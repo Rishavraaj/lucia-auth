@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { signUpSchema } from "./signup-form";
 import { z } from "zod";
+import { Argon2id } from "oslo/password";
 
 export const signUp = async (data: z.infer<typeof signUpSchema>) => {
   try {
@@ -19,13 +20,13 @@ export const signUp = async (data: z.infer<typeof signUpSchema>) => {
       };
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await new Argon2id().hash(data.password);
 
     const user = await db.user.create({
       data: {
         email: data.email.toLowerCase(),
         name: data.name,
-        hashedPassword: await bcrypt.hash(data.password, 10),
+        hashedPassword,
       },
     });
   } catch (error) {
