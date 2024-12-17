@@ -8,6 +8,8 @@ import { lucia } from "@/lib/lucia";
 import { cookies } from "next/headers";
 import { signInSchema } from "./signin-form";
 import { redirect } from "next/navigation";
+import { googleOAuthClient } from "@/lib/google-oauth";
+import { generateCodeVerifier, generateState } from "arctic";
 
 export const signUp = async (data: z.infer<typeof signUpSchema>) => {
   try {
@@ -105,4 +107,38 @@ export const signOut = async () => {
   const session = await lucia.createBlankSessionCookie();
   (await cookies()).set(session.name, session.value, session.attributes);
   return redirect("/authenticate");
+};
+
+export const googleOAuthConsentUrl = async () => {
+  try {
+    const state = generateState();
+    const codeVerifier = generateCodeVerifier();
+    (await cookies()).set("codeVerifier", codeVerifier, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    (await cookies()).set("state", state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    const authUrl = googleOAuthClient.createAuthorizationURL(
+      state,
+      codeVerifier,
+      ["email", "profile"]
+    );
+
+    return {
+      success: true,
+      url: authUrl.toString(),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: "Something went wrong",
+    };
+  }
 };
