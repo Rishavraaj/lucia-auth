@@ -18,6 +18,16 @@ export const signUp = async (data: z.infer<typeof signUpSchema>) => {
         success: false,
       };
     }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await db.user.create({
+      data: {
+        email: data.email.toLowerCase(),
+        name: data.name,
+        hashedPassword: await bcrypt.hash(data.password, 10),
+      },
+    });
   } catch (error) {
     console.error(error);
   }
