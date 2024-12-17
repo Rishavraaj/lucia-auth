@@ -1,6 +1,9 @@
+"use client";
 import { FC } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { googleOAuthConsentUrl } from "@/app/authenticate/auth.action";
+import { toast } from "sonner";
 
 interface GoogleSignInButtonProps {
   className?: string;
@@ -9,6 +12,14 @@ interface GoogleSignInButtonProps {
 const GoogleSignInButton: FC<GoogleSignInButtonProps> = ({ className }) => {
   return (
     <Button
+      onClick={async () => {
+        const res = await googleOAuthConsentUrl();
+        if (res.url) {
+          window.location.href = res.url;
+        } else {
+          toast.error(res.error);
+        }
+      }}
       className={cn("flex items-center gap-2", className)}
       variant="outline"
     >

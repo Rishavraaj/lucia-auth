@@ -127,7 +127,7 @@ export const googleOAuthConsentUrl = async () => {
     const authUrl = googleOAuthClient.createAuthorizationURL(
       state,
       codeVerifier,
-      ["email", "profile"]
+      ["email", "profile", "openid"]
     );
 
     return {
