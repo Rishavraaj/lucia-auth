@@ -22,6 +22,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { signIn } from "./auth.action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export const signInSchema = z.object({
   email: z.string().email(),
@@ -29,6 +32,7 @@ export const signInSchema = z.object({
 });
 
 export default function SignInForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -37,8 +41,14 @@ export default function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof signInSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof signInSchema>) {
+    const response = await signIn(values);
+    if (response.success) {
+      toast.success("Signed in successfully");
+      router.push("/");
+    } else {
+      toast.error(response.error);
+    }
   }
 
   return (

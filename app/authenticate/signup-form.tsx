@@ -50,15 +50,12 @@ export default function SignInForm() {
   });
 
   async function onSubmit(values: z.infer<typeof signUpSchema>) {
-    try {
-      const response = await signUp(values);
-      if (response.success) {
-        toast.success("Account created successfully");
-        router.push("/");
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-      console.error(error);
+    const response = await signUp(values);
+    if (response.success) {
+      toast.success("Account created successfully");
+      router.push("/");
+    } else {
+      toast.error(response.error);
     }
   }
 
